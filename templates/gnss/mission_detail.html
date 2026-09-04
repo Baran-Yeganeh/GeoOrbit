@@ -1,0 +1,52 @@
+{% extends "mainHtml.html" %}
+{% block title %}
+    mission_detail
+{% endblock  %}
+
+{% block mission %}
+    
+
+    <table border="1">
+            <tr>
+                <td>project name</td>
+                <td>{{ mission.project_name }}</td>
+            </tr>
+            <tr>
+                <td>project location</td>
+                <td>{{ mission.project_location }}</td>
+            </tr>
+            <tr>
+                <td>surveying start date</td>
+                <td>{{ mission.surveying_start_date }}</td>
+            </tr>
+            <tr>
+                <td>surveying end date</td>
+                <td>{{ mission.surveying_end_date }}</td>
+            </tr>
+            <tr>
+                <td>receiver</td>
+                <td>{{ mission.receiver}}</td>
+            </tr>
+            <tr>
+                <td>satellite_systems</td>
+                <td>
+                    {% for satellite in mission.satellite_systems.all %}
+                        {{ satellite }}
+                        {% if not forloop.last %}
+                           |
+                        {% endif %}
+                    {% endfor %}
+                   
+                </td>
+            </tr>
+    </table>
+
+
+{% endblock %}
+
+
+
+
+
+
+

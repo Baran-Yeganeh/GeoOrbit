@@ -1,0 +1,41 @@
+{% extends "mainHtml.html" %}
+{% block title %}
+    mission_list
+{% endblock  %}
+
+{% block mission %}
+    
+    <table border="1">
+            <tr>
+                <th>project name</th>
+                <th>project location</th>
+                <th>project end date</th>
+                <th></th>
+                <th></th>
+            </tr>
+            
+            {% for mission in object_list %}
+                <tr>
+                    <td>
+                        <a href='{% url "mission_detail" pk=mission.pk %}'>{{ mission.project_name }}</a>
+                        
+                    </td>
+                    <td>{{ mission.project_location }}</td>
+                    <td>{{ mission.surveying_end_date }}</td>
+                    <td>
+                        <a href='{% url "mission_edit" pk=mission.pk %}'>Edit</a>
+                    </td>
+                    <td>
+                        <a href='{% url "mission_delete" pk=mission.pk %}'>ِDelete</a>
+                    </td>
+                   
+                </tr>
+
+            {% endfor %}
+            
+    </table>
+    </br>
+    <a href="{% url "mission_create" %}" style='background-color:blue; color:yellow; margin: 20px'>Add New Mission</a>
+
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "mainHtml.html" %}
+{% block title %}
+    mission_form
+{% endblock  %}
+
+{% block mission %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <table>
+            <div>
+                {{form.as_table}}
+            </div>
+
+        </table>
+        <div>
+            <button type="submit" style='background-color:green; margine: 10px'>submit</button>
+        </div>
+    </form>    
+{% endblock %}

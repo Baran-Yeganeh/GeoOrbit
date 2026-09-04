@@ -1,0 +1,23 @@
+
+{% extends "mainHtml.html" %}
+
+{% block title %}
+    Delete Mission
+{% endblock %}
+
+{% block mission %}
+
+    <h3>Are you sure you want to delete this mission?</h3>
+
+    <p>Project Name: {{ mission.project_name }}</p>
+    <p>Project Location: {{ mission.project_location }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" style="background-color:red;">Yes, Delete</button>
+    </form>
+
+    <a href="{% url 'mission_list' %}" style="background-color:green;">Cancel</a>
+
+{% endblock %}
+
