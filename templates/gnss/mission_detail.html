@@ -39,6 +39,17 @@
                    
                 </td>
             </tr>
+            <tr>
+                <td>image</td>
+                <td>
+                    {% if  mission.mission_image  %}
+                        <img src="{{ mission.mission_image.url }}" width="300">
+                    {% else %}
+                        <p>no image</p>    
+                    {% endif %}
+                    
+                </td>
+            </tr>
     </table>
 
 

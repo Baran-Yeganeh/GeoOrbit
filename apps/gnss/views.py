@@ -3,6 +3,19 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Mission
 from django.urls import reverse_lazy
+from django.core.mail import send_mail
+from django.http import HttpResponse
+
+def send_email(request):
+    send_mail(
+        subject='GeoOrbit Test Email.',
+        message='this is just a test.',
+        from_email=None,
+        recipient_list=['Baran.yeganeh.1995@gmail.com'],
+        fail_silently=False
+        
+    )
+    return HttpResponse('Email sent successfully!')
 
 # def mission_form_01(request):
     

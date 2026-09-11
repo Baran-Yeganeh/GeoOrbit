@@ -21,7 +21,11 @@ class Mission(models.Model):
                                             related_name='mission',
                                             verbose_name='satellite system',
                                             blank=True)
-    
+    mission_image = models.ImageField(verbose_name='Image',
+                                      upload_to='gnss/mission_image/',
+                                      null=True,
+                                      blank=True)
+        
     
     def __str__(self):
         return self.project_name
