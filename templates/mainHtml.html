@@ -5,13 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeoOrbit | {% block title %}{% endblock  %}</title>
+    {% include "partials/bootstrap.html" %}
     <link rel="stylesheet" href="{% static 'css/one.css' %}">
 </head>
 <body>
+    
     <header>
         <h1>header of GeoOrbit site</h1>
+        
     </header>
-
+    
+    {% include "partials/navbar.html" %}
+    
     <main>
         {% block firstpage %}{% endblock %}
         {% block introduction %}{% endblock %}
@@ -22,5 +27,12 @@
     <footer>
         <h1>footer of GeoOrbit site</h1>
     </footer>
+    <button id='testButton'>click for test</button>
+    <script src='{% static "js/main.js" %}'></script>
+    
 </body>
 </html>
+
+
+
+
