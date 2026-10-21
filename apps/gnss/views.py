@@ -1,10 +1,18 @@
-# from django.shortcuts import render, redirect
-# from apps.gnss.forms.mission_form import Mission_Form_1
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Mission
+from .models import Mission, Receiver, SatelliteSystem, ProcessingReport
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import (MissionSerializer, ReceiverSerializer,
+                          SatelliteSystemSerializer, ProcessingReportSerializer)
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from .permissions import MissionPermission
+
+
 
 def send_email(request):
     send_mail(
@@ -86,5 +94,102 @@ def test_java(request):
     context = { 'mission': mission_list }
     return JsonResponse(context)   
  
+@api_view(['GET'])
+@permission_classes([MissionPermission])
+def mission_api_list(request):
+    missions = Mission.objects.all()
+    serializer = MissionSerializer(missions, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([MissionPermission])
+
+def mission_api_detail(request,pk):
+    mission = get_object_or_404(Mission, pk=pk)
+    serializer = MissionSerializer(mission)
+    return Response(serializer.data)
     
-    
+class MissionApiCreate(APIView):
+    permission_classes = [MissionPermission]
+    def post(self,request):
+        serializer = MissionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+class MissionApiDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Mission.objects.all()
+    serializer_class = MissionSerializer
+    permission_classes = [MissionPermission]
+
+
+class ReceiverApiListCreate(APIView):
+    permission_classes = [MissionPermission]
+
+    def get(self, request):
+        receivers = Receiver.objects.all()
+        serializer = ReceiverSerializer(receivers, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ReceiverSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+class ReceiverApiDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Receiver.objects.all()
+    serializer_class = ReceiverSerializer
+    permission_classes = [MissionPermission]
+
+
+class SatelliteSystemApiListCreate(APIView):
+    permission_classes = [MissionPermission]
+
+    def get(self, request):
+        systems = SatelliteSystem.objects.all()
+        serializer = SatelliteSystemSerializer(systems, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = SatelliteSystemSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+
+class SatelliteSystemApiDetail(RetrieveUpdateDestroyAPIView):
+    queryset = SatelliteSystem.objects.all()
+    serializer_class = SatelliteSystemSerializer
+    permission_classes = [MissionPermission]
+
+
+class ProcessingReportApiListCreate(APIView):
+    permission_classes = [MissionPermission]
+
+    def get(self, request):
+        reports = ProcessingReport.objects.all()
+        serializer = ProcessingReportSerializer(reports, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ProcessingReportSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+
+class ProcessingReportApiDetail(RetrieveUpdateDestroyAPIView):
+    queryset = ProcessingReport.objects.all()
+    serializer_class = ProcessingReportSerializer
+    permission_classes = [MissionPermission]
