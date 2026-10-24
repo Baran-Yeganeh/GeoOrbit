@@ -1,27 +1,35 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <a class="navbar-brand" href="{% url "mainPage" %}">GeoOrbit</a>
+{% url 'mainPage' as home_url %}
+<nav class="go-nav" id="goNav">
+  <div class="container">
 
-  <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-      <li class="nav-item active">
-        <a class="nav-link" href="{% url "mainPage" %}">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url "mission_list" %}">Missions</a>
-      </li>
-      {% comment %} <li class="nav-item">
-        <a class="nav-link disabled">Disabled</a>
-      </li> {% endcomment %}
+    <a href="{% url 'mainPage' %}" class="go-brand">
+      <svg class="go-brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="6" fill="#ffb347"/>
+        <g class="ring"><ellipse cx="16" cy="16" rx="14" ry="5.5" stroke="#eaf0f7" stroke-width="1.2" transform="rotate(-28 16 16)"/>
+        <circle cx="28" cy="10.4" r="2" fill="#54d2ff" transform="rotate(-0 16 16)"/></g>
+      </svg>
+      <span class="go-brand-name">GeoOrbit<i>.</i></span>
+    </a>
+
+    <ul class="go-links">
+      <li><a href="{% url 'mainPage' %}" {% if request.path == home_url %}class="active"{% endif %}>Home</a></li>
+      <li><a href="{% url 'mission_list' %}" {% if '/gnss/' in request.path %}class="active"{% endif %}>Missions</a></li>
     </ul>
-    <div>
-      <form class="form-inline my-2 my-lg-0">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="searchInput">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-      </form>
-      <div id='searchResults'></div>
+
+    <div class="go-search">
+      <span class="ico">⌕</span>
+      <input type="search" id="searchInput" placeholder="Search missions…" aria-label="Search missions" autocomplete="off">
+      <div id="searchResults" class="search-results"></div>
     </div>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}" class="go-auth">
+      {% csrf_token %}<button type="submit" class="go-auth-btn">Sign out ({{ user.username }})</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login' %}" class="go-auth-btn">Sign in</a>
+    {% endif %}
+
+    <button class="go-burger" id="goBurger" aria-label="Menu">☰</button>
   </div>
 </nav>

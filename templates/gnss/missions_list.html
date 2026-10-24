@@ -1,44 +1,71 @@
 {% extends "mainHtml.html" %}
-{% block title %}
-    mission_list
-{% endblock  %}
+{% load static %}
+{% block title %}Surveying Missions{% endblock %}
 
 {% block mission %}
-    <p style='color: purple;'>last mission viewed: {{ last_mission_id }}</p>
-    <table border="1">
-            <tr>
-                <th>project name</th>
-                <th>project location</th>
-                <th>project end date</th>
-                <th></th>
-                <th></th>
-            </tr>
-            
-            {% for mission in object_list %}
-                <tr>
-                    <td>
-                        <a href='{% url "mission_detail" pk=mission.pk %}'>{{ mission.project_name }}</a>
-                        
-                    </td>
-                    <td>{{ mission.project_location }}</td>
-                    <td>{{ mission.surveying_end_date }}</td>
-                    <td>
-                        <a href='{% url "mission_edit" pk=mission.pk %}'>Edit</a>
-                    </td>
-                    <td>
-                        <a href='{% url "mission_delete" pk=mission.pk %}'>ِDelete</a>
-                    </td>
-                   
-                </tr>
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/beautifulEarthInCenter.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">Mission control</span>
+    <h1>Surveying missions</h1>
+    <p>Field projects, GNSS receivers and satellite observation data, {{ object_list|length }} record{{ object_list|length|pluralize }} on file.</p>
+    <div class="row-actions">
+      {% if user.is_authenticated %}<a href="{% url 'mission_create' %}" class="btn-go">New mission <span>＋</span></a>{% endif %}
+      {% if last_mission_id %}
+      <a href="{% url 'mission_detail' pk=last_mission_id %}" class="btn-go-ghost">Resume #{{ last_mission_id }} <span>↗</span></a>
+      {% endif %}
+    </div>
+  </div>
+</header>
 
-            {% endfor %}
-            
-    </table>
-    </br>
-    <a href="{% url "mission_create" %}" style='background-color:blue; color:yellow; margin: 20px'>Add New Mission</a>
+<section class="page-body">
+  <div class="container">
+  {% if object_list %}
+    <div class="m-grid">
+      {% for mission in object_list %}
+      <article class="m-card reveal">
+        <div class="m-img">
+          {% if mission.mission_image %}
+            <img src="{{ mission.mission_image.url }}" alt="{{ mission.project_name }}" loading="lazy">
+          {% else %}
+            <img src="{% static 'images/web/beautifulEarthInCenter.jpg' %}" alt="Earth from space" loading="lazy">
+          {% endif %}
+          <span class="m-id">MISSION · {{ mission.pk|stringformat:"03d" }}</span>
+        </div>
+        <div class="m-body">
+          <h2>{{ mission.project_name }}</h2>
+          <div class="m-loc">⌖ {{ mission.project_location|default:"Location not specified" }}</div>
 
+          <div class="m-facts">
+            <div><small>Start</small><span>{{ mission.surveying_start_date|date:"d M Y" }}</span></div>
+            <div><small>End</small><span>{{ mission.surveying_end_date|date:"d M Y" }}</span></div>
+            <div><small>Receiver</small><span>{{ mission.receiver|default:"Not assigned" }}</span></div>
+          </div>
 
+          <div class="chips">
+            {% for system in mission.satellite_systems.all %}<span>{{ system }}</span>
+            {% empty %}<span class="muted">No systems assigned</span>{% endfor %}
+          </div>
+
+          <div class="m-actions">
+            <a href="{% url 'mission_detail' pk=mission.pk %}" class="btn-go btn-sm-go view">View details ↗</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'mission_edit' pk=mission.pk %}" class="icon-link" aria-label="Edit {{ mission.project_name }}">Edit</a>
+            <a href="{% url 'mission_delete' pk=mission.pk %}" class="icon-link del" aria-label="Delete {{ mission.project_name }}">Delete</a>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty reveal">
+      <div class="sym">⌖</div>
+      <h2>No missions yet</h2>
+      <p>Your surveying projects will appear here. Create the first one to get started.</p>
+      <a href="{% url 'mission_create' %}" class="btn-go">Create first mission ＋</a>
+    </div>
+  {% endif %}
+  </div>
+</section>
 {% endblock %}
-
-
-

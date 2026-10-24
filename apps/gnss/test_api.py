@@ -321,6 +321,62 @@ class MissionAPITests(APITestCase):
             status.HTTP_400_BAD_REQUEST
         )
 
+    def test_invalid_date_range_is_rejected_on_create(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.employee_token.key}'
+        )
+
+        mission_count_before = Mission.objects.count()
+
+        response = self.client.post(
+            self.create_url,
+            {
+                'project_name': 'Invalid Date Mission',
+                'project_location': 'Berlin',
+                'surveying_start_date': '2030-10-20T10:00:00Z',
+                'surveying_end_date': '2030-10-19T10:00:00Z',
+            },
+            format='json'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+        self.assertIn('surveying_end_date', response.data)
+        self.assertEqual(
+            Mission.objects.count(),
+            mission_count_before
+        )
+
+    def test_invalid_date_range_is_rejected_on_patch(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.manager_token.key}'
+        )
+
+        original_start_date = self.mission.surveying_start_date
+
+        response = self.client.patch(
+            self.detail_url,
+            {
+                'surveying_start_date': '2099-01-01T10:00:00Z',
+            },
+            format='json'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+        self.assertIn('surveying_end_date', response.data)
+
+        self.mission.refresh_from_db()
+
+        self.assertEqual(
+            self.mission.surveying_start_date,
+            original_start_date
+        )
+
     def test_employee_cannot_delete_mission(self):
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.employee_token.key}'
@@ -335,7 +391,6 @@ class MissionAPITests(APITestCase):
         self.assertTrue(
             Mission.objects.filter(pk=self.mission.pk).exists()
         )
-
 
     def test_manager_can_delete_mission(self):
         self.client.credentials(

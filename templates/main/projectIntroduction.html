@@ -1,10 +1,14 @@
 {% extends "mainHtml.html" %}
+{% load static %}
+{% block title %}Introduction{% endblock %}
 
 {% block introduction %}
-    <h2>Introduction page of my site</h2>
-    <h1>{{name}} </h1>
-{% endblock  %}
-
-{% block title %}
-    introduction
-{% endblock  %}
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/beautifulEarth.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">About</span>
+    <h1>Introduction</h1>
+    <p>GeoOrbit is a workspace for GNSS surveying and geodesy projects.</p>
+  </div>
+</header>
+{% endblock %}

@@ -1,21 +1,28 @@
 {% extends "mainHtml.html" %}
-{% block title %}
-    mission_form
-{% endblock  %}
+{% load static %}
+{% block title %}Mission Form{% endblock %}
 
 {% block mission %}
-    <form action="" method="POST">
-        {% csrf_token %}
-        <table>
-            <div>
-                {{form.as_table}}
-            </div>
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/satheader0.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">Mission</span>
+    <h1>Mission form</h1>
+    <p>Fill in the mission details.</p>
+  </div>
+</header>
 
-        </table>
-        <div>
-            <button type="submit">submit</button>
-        </div>
-    </form>    
+<section class="page-body">
+  <div class="container">
+    <form method="POST" enctype="multipart/form-data" class="go-form reveal">
+      {% csrf_token %}
+
+      <div class="go-form-grid">{% include "gnss/_form_fields.html" %}</div>
+      <div class="form-actions">
+        <button type="submit" class="btn-go">Submit <span>↗</span></button>
+        <a href="{% url 'mission_list' %}" class="btn-go-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}
-
-

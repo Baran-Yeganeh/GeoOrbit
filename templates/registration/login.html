@@ -1,0 +1,27 @@
+{% extends "mainHtml.html" %}
+{% load static %}
+{% block title %}Sign in{% endblock %}
+
+{% block mission %}
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/satheader0.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">Access</span>
+    <h1>Sign in</h1>
+    <p>Sign in to create, edit or delete surveying missions.</p>
+  </div>
+</header>
+
+<section class="page-body">
+  <div class="container">
+    <form method="POST" class="go-form reveal" style="max-width:480px">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.errors %}<ul class="errorlist"><li>Incorrect username or password.</li></ul>{% endif %}
+      <div class="fld"><label for="id_username">Username</label>{{ form.username }}</div>
+      <div class="fld"><label for="id_password">Password</label>{{ form.password }}</div>
+      <div class="form-actions"><button type="submit" class="btn-go">Sign in <span>↗</span></button></div>
+    </form>
+  </div>
+</section>
+{% endblock %}

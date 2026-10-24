@@ -1,63 +1,60 @@
 {% extends "mainHtml.html" %}
-{% block title %}
-    mission_detail
-{% endblock  %}
+{% load static %}
+{% block title %}{{ mission.project_name }}{% endblock %}
 
 {% block mission %}
-    
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/header01.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">Mission · {{ mission.pk|stringformat:"03d" }}</span>
+    <h1>{{ mission.project_name }}</h1>
+    <p class="mono">⌖ {{ mission.project_location|default:"Location not specified" }}</p>
+  </div>
+</header>
 
-    <table border="1">
-            <tr>
-                <td>project name</td>
-                <td>{{ mission.project_name }}</td>
-            </tr>
-            <tr>
-                <td>project location</td>
-                <td>{{ mission.project_location }}</td>
-            </tr>
-            <tr>
-                <td>surveying start date</td>
-                <td>{{ mission.surveying_start_date }}</td>
-            </tr>
-            <tr>
-                <td>surveying end date</td>
-                <td>{{ mission.surveying_end_date }}</td>
-            </tr>
-            <tr>
-                <td>receiver</td>
-                <td>{{ mission.receiver}}</td>
-            </tr>
-            <tr>
-                <td>satellite_systems</td>
-                <td>
-                    {% for satellite in mission.satellite_systems.all %}
-                        {{ satellite }}
-                        {% if not forloop.last %}
-                           |
-                        {% endif %}
-                    {% endfor %}
-                   
-                </td>
-            </tr>
-            <tr>
-                <td>image</td>
-                <td>
-                    {% if  mission.mission_image  %}
-                        <img src="{{ mission.mission_image.url }}" width="300">
-                    {% else %}
-                        <p>no image</p>    
-                    {% endif %}
-                    
-                </td>
-            </tr>
-    </table>
+<section class="page-body">
+  <div class="container">
+    <a href="{% url 'mission_list' %}" class="back-link">← ALL MISSIONS</a>
+    <div class="d-wrap">
+      <div class="d-photo reveal">
+        {% if mission.mission_image %}
+          <img src="{{ mission.mission_image.url }}" alt="{{ mission.project_name }}">
+        {% else %}
+          <img src="{% static 'images/web/beautifulEarth.jpg' %}" alt="Earth from space">
+        {% endif %}
+        <div class="cross"></div>
+        <span class="badge-live"><i></i>FIELD DATA</span>
+      </div>
 
+      <div class="d-panel reveal">
+        <div class="d-row"><small>Start date</small><span class="v">{{ mission.surveying_start_date|date:"d M Y · H:i" }}</span></div>
+        <div class="d-row"><small>End date</small><span class="v">{{ mission.surveying_end_date|date:"d M Y · H:i" }}</span></div>
+        <div class="d-row"><small>GNSS receiver</small><span class="v">{{ mission.receiver|default:"Not assigned" }}</span></div>
+        <div class="d-row" style="border:0"><small>Satellite systems</small>
+          <div class="chips">
+            {% for s in mission.satellite_systems.all %}<span>{{ s }}</span>
+            {% empty %}<span class="muted">No systems assigned</span>{% endfor %}
+          </div>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="d-actions">
+          <a href="{% url 'mission_edit' pk=mission.pk %}" class="btn-go btn-sm-go">Edit</a>
+          <a href="{% url 'mission_delete' pk=mission.pk %}" class="btn-go-ghost btn-danger-go btn-sm-go">Delete</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
 
+    {% if mission.processing_report %}
+    <div class="d-report reveal">
+      <span class="tag">Processing report</span>
+      <div class="d-row" style="border:0;padding-bottom:0">
+        <small>Method · Accuracy</small>
+        <span class="v">{{ mission.processing_report.method }} · {{ mission.processing_report.accuracy }}</span>
+        <p>{{ mission.processing_report.description }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}
-
-
-
-
-
-
-

@@ -1,99 +1,104 @@
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Mission, Receiver, SatelliteSystem, ProcessingReport
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.core.mail import send_mail
-from django.http import HttpResponse, JsonResponse
+from django.views.generic import (CreateView, DeleteView, DetailView,
+                                  ListView, UpdateView)
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .serializers import (MissionSerializer, ReceiverSerializer,
-                          SatelliteSystemSerializer, ProcessingReportSerializer)
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .forms import MissionForm
+from .models import Mission, ProcessingReport, Receiver, SatelliteSystem
 from .permissions import MissionPermission
+from .serializers import (MissionSerializer, ProcessingReportSerializer,
+                          ReceiverSerializer, SatelliteSystemSerializer)
 
 
+# --------------------------------------------------------------------------
+# Web views (HTML)
+# --------------------------------------------------------------------------
 
-def send_email(request):
-    send_mail(
-        subject='GeoOrbit Test Email.',
-        message='this is just a test.',
-        from_email=None,
-        recipient_list=['Baran.yeganeh.1995@gmail.com'],
-        fail_silently=False
-        
-    )
-    return HttpResponse('Email sent successfully!')
-
-# def mission_form_01(request):
-    
-#     if request.method == 'POST':
-#         mission_form = Mission_Form_1(request.POST)
-#         if mission_form.is_valid():
-#             mission_form.save()    
-#             return redirect('mission_list')
-#     else:    
-#         mission_form = Mission_Form_1()
-            
-#     context = {'form' : mission_form}
-#     return render(request,'gnss/mission_form.html',context)
-
-class MissionCreate(CreateView):
-    model = Mission
-    fields = '__all__'
-    template_name = 'gnss/create_mission.html'
-    success_url = reverse_lazy('mission_list')
-    
 class MissionList(ListView):
     model = Mission
     template_name = 'gnss/missions_list.html'
-    
+
+    def get_queryset(self):
+        # select_related / prefetch_related avoid one extra query per card.
+        return (
+            Mission.objects
+            .select_related('receiver')
+            .prefetch_related('satellite_systems')
+            .order_by('-surveying_start_date', 'project_name')
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        last_mission_id = self.request.session.get('last_mission_id')
-        context['last_mission_id'] = last_mission_id
+        context['last_mission_id'] = self.request.session.get('last_mission_id')
         return context
+
 
 class MissionDetail(DetailView):
     model = Mission
     template_name = 'gnss/mission_detail.html'
-    context_object_name = 'mission' 
-    
-    def get_object(self, queryset = None):
+    context_object_name = 'mission'
+
+    def get_queryset(self):
+        return (
+            Mission.objects
+            .select_related('receiver', 'processing_report')
+            .prefetch_related('satellite_systems')
+        )
+
+    def get_object(self, queryset=None):
         mission = super().get_object(queryset)
-        self.request.session['last_mission_id'] = mission.pk  
+        self.request.session['last_mission_id'] = mission.pk
         return mission
-     
-    
-class MissionUpdate(UpdateView):
+
+
+class MissionCreate(LoginRequiredMixin, CreateView):
     model = Mission
-    fields = '__all__'
-    template_name = 'gnss/mission_update.html'
-    context_object_name = 'mission'       
+    form_class = MissionForm
+    template_name = 'gnss/create_mission.html'
     success_url = reverse_lazy('mission_list')
-    
-class MissionDelete(DeleteView):
+
+
+class MissionUpdate(LoginRequiredMixin, UpdateView):
+    model = Mission
+    form_class = MissionForm
+    template_name = 'gnss/mission_update.html'
+    context_object_name = 'mission'
+    success_url = reverse_lazy('mission_list')
+
+
+class MissionDelete(LoginRequiredMixin, DeleteView):
     model = Mission
     template_name = 'gnss/mission_delete.html'
-    context_object_name = 'mission'       
-    success_url = reverse_lazy('mission_list')    
-    
-    
-def test_java(request):
-    data = request.GET.get('name')
-    missions = Mission.objects.filter( project_name__icontains = data )
-    mission_list = []
-    for mission in missions:
-        mission_list.append({
-            'name': mission.project_name,
-            'id': mission.id
-            })
-        
-    
-    
-    context = { 'mission': mission_list }
-    return JsonResponse(context)   
- 
+    context_object_name = 'mission'
+    success_url = reverse_lazy('mission_list')
+
+
+def mission_search(request):
+    """JSON endpoint used by the live search box in the navbar."""
+    query = request.GET.get('name', '').strip()
+    if not query:
+        return JsonResponse({'mission': []})
+
+    missions = (
+        Mission.objects
+        .filter(Q(project_name__icontains=query) | Q(project_location__icontains=query))
+        .order_by('project_name')[:8]
+    )
+    return JsonResponse({
+        'mission': [{'id': m.pk, 'name': m.project_name} for m in missions]
+    })
+
+
+# --------------------------------------------------------------------------
+# REST API
+# --------------------------------------------------------------------------
+
 @api_view(['GET'])
 @permission_classes([MissionPermission])
 def mission_api_list(request):
@@ -101,14 +106,6 @@ def mission_api_list(request):
     serializer = MissionSerializer(missions, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes([MissionPermission])
-
-def mission_api_detail(request,pk):
-    mission = get_object_or_404(Mission, pk=pk)
-    serializer = MissionSerializer(mission)
-    return Response(serializer.data)
-    
 class MissionApiCreate(APIView):
     permission_classes = [MissionPermission]
     def post(self,request):

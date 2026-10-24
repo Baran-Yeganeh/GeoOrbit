@@ -1,22 +1,28 @@
 {% extends "mainHtml.html" %}
-{% block title %}
-    mission_form
-{% endblock  %}
+{% load static %}
+{% block title %}Edit Mission{% endblock %}
 
 {% block mission %}
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <table>
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/satheader0.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">Edit record</span>
+    <h1>{{ mission.project_name }}</h1>
+    <p>Update the details of this surveying mission.</p>
+  </div>
+</header>
 
-                {{form.as_table}}
-
-
-        </table>
-        <div>
-            <button type="submit" style='background-color:green; margin: 10px'>submit</button>
-        </div>
-    </form>    
+<section class="page-body">
+  <div class="container">
+    <form method="POST" enctype="multipart/form-data" class="go-form reveal">
+      {% csrf_token %}
+      {% if mission.mission_image %}<img src="{{ mission.mission_image.url }}" alt="Current image" class="cur-img">{% endif %}
+      <div class="go-form-grid">{% include "gnss/_form_fields.html" %}</div>
+      <div class="form-actions">
+        <button type="submit" class="btn-go">Save changes <span>↗</span></button>
+        <a href="{% url 'mission_detail' pk=mission.pk %}" class="btn-go-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}
-
-
-

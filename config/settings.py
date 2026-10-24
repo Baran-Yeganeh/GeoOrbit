@@ -22,13 +22,26 @@ load_dotenv(BASE_DIR/ '.env')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-only-insecure-key-change-me')
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').strip().lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+    if host.strip()
+]
 
+if not DEBUG:
+    if SECRET_KEY == 'dev-only-insecure-key-change-me':
+        raise ValueError(
+            'Set a secure DJANGO_SECRET_KEY in your environment.'
+        )
+
+    if not ALLOWED_HOSTS:
+        raise ValueError(
+            'Set DJANGO_ALLOWED_HOSTS for production.'
+        )
 
 # Application definition
 
@@ -79,16 +92,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'NAME': 'gnss_lab_db',
-        'USER': 'root',
-        'HOST': 'localhost',
-        'PORT': 3306,
-        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+    "default": {
+        "ENGINE": "mysql.connector.django",
+        "NAME": os.getenv("MYSQL_DATABASE", "gnss_lab_db"),
+        "USER": os.getenv("MYSQL_USER", "root"),
+        "PASSWORD": os.getenv("MYSQL_PASSWORD"),
+        "HOST": os.getenv("MYSQL_HOST", "localhost"),
+        "PORT": int(os.getenv("MYSQL_PORT", "3306")),
     }
 }
+
 
 
 # Password validation
@@ -125,10 +140,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR,'static/'),)
 
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -143,3 +158,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
+
+# Authentication (login is required to create, edit or delete missions)
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'mission_list'
+LOGOUT_REDIRECT_URL = 'mainPage'

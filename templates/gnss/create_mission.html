@@ -1,22 +1,28 @@
 {% extends "mainHtml.html" %}
-{% block title %}
-    mission_form
-{% endblock  %}
+{% load static %}
+{% block title %}New Mission{% endblock %}
 
 {% block mission %}
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <table>
-            <div>
-                {{form.as_table}}
-            </div>
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/satheader0.jpg' %}" alt=""></div>
+  <div class="container">
+    <span class="tag">New record</span>
+    <h1>Create a mission</h1>
+    <p>Register a GNSS surveying project: location, dates, receiver and satellite systems.</p>
+  </div>
+</header>
 
-        </table>
-        <div>
-            <button type="submit" style='background-color:green; margine: 10px'>submit</button>
-        </div>
-    </form>    
+<section class="page-body">
+  <div class="container">
+    <form method="POST" enctype="multipart/form-data" class="go-form reveal">
+      {% csrf_token %}
+
+      <div class="go-form-grid">{% include "gnss/_form_fields.html" %}</div>
+      <div class="form-actions">
+        <button type="submit" class="btn-go">Save mission <span>↗</span></button>
+        <a href="{% url 'mission_list' %}" class="btn-go-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}
-
-
-

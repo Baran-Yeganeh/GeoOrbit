@@ -1,23 +1,29 @@
-
 {% extends "mainHtml.html" %}
-
-{% block title %}
-    Delete Mission
-{% endblock %}
+{% load static %}
+{% block title %}Delete Mission{% endblock %}
 
 {% block mission %}
+<header class="page-hero">
+  <div class="page-hero-bg"><img src="{% static 'images/web/satelliteNasa04.jpg' %}" alt=""></div>
+  <div class="container"><span class="tag">Permanent action</span><h1>Delete mission</h1></div>
+</header>
 
-    <h3>Are you sure you want to delete this mission?</h3>
-
-    <p>Project Name: {{ mission.project_name }}</p>
-    <p>Project Location: {{ mission.project_location }}</p>
-
-    <form method="POST">
+<section class="page-body">
+  <div class="container">
+    <div class="danger reveal">
+      <div class="ico">!</div>
+      <h2>Are you sure?</h2>
+      <p>This permanently removes the mission and its linked processing report. This cannot be undone.</p>
+      <div class="sum">
+        <div class="d-row" style="padding-top:0"><small>Project name</small><span class="v">{{ mission.project_name }}</span></div>
+        <div class="d-row" style="border:0;padding-bottom:0"><small>Location</small><span class="v">{{ mission.project_location }}</span></div>
+      </div>
+      <form method="POST" class="form-actions">
         {% csrf_token %}
-        <button type="submit" style="background-color:red;">Yes, Delete</button>
-    </form>
-
-    <a href="{% url 'mission_list' %}" style="background-color:green;">Cancel</a>
-
+        <button type="submit" class="btn-go btn-danger-go">Yes, delete</button>
+        <a href="{% url 'mission_list' %}" class="btn-go-ghost">Cancel</a>
+      </form>
+    </div>
+  </div>
+</section>
 {% endblock %}
-
